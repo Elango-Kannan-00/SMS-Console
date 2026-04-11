@@ -13,7 +13,7 @@ public class DBConnect {
             Properties props = new Properties();
 
             // Load directly from file system (no classpath issues)
-            FileInputStream input = new FileInputStream("src/db.properties");
+            FileInputStream input = new FileInputStream("src/db/db.properties");
             props.load(input);
 
             String url = props.getProperty("db.url");

@@ -1,11 +1,10 @@
 package dao;
-import db.DBConnect;
-
-import model.Student;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import db.DBConnect;
+import models.Student;
 
 public class StudentDAO {
 
