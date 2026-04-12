@@ -12,13 +12,13 @@ This is a great beginner-to-intermediate Java project that shows how real-world 
 
 # Features
 
-- ✅ **Add Student** — Enter name, age, email, and course to register a student
-- 📋 **View All Students** — List all student records from the database
-- ✏️ **Update Student** — Modify a student's details using their ID
-- 🗑️ **Delete Student** — Remove a student record by ID
-- 🔐 **Externalized DB Config** — Credentials stored in `db.properties`, not hardcoded
-- 🏗️ **DAO Pattern** — Clean separation between database logic and business logic
-- 🔄 **Looping Menu** — Interactive CLI menu runs continuously until user exits
+- **Add Student** — Enter name, age, email, and course to register a student
+- **View All Students** — List all student records from the database
+- **Update Student** — Modify a student's details using their ID
+- **Delete Student** — Remove a student record by ID
+- **Externalized DB Config** — Credentials stored in `db.properties`, not hardcoded
+- **DAO Pattern** — Clean separation between database logic and business logic
+- **Looping Menu** — Interactive CLI menu runs continuously until user exits
 
 
 # Tech Stack
@@ -41,16 +41,15 @@ SMS-Console/
 ├── src/
 │   ├── Main.java                  # Entry point — CLI menu loop
 │   │
-│   ├── model/
+│   ├── models/
 │   │   └── Student.java           # Student POJO (id, name, age, email, course)
 │   │
 │   ├── dao/
 │   │   └── StudentDAO.java        # All CRUD operations via JDBC
 │   │
 │   ├── db/
-│   │   └── DBConnect.java         # Reads db.properties and returns Connection
-│   │
-│   └── db.properties              # DB URL, username, password (not committed)
+│   │   ├── DBConnect.java         # Reads db.properties and returns Connection
+│   │   └── db.properties          # DB URL, username, password (not committed)
 ```
 
 
@@ -122,7 +121,25 @@ db.password=your_mysql_password
 - In **Eclipse**: Right-click project → `Build Path` → `Add External JARs` → select the JAR
 - In **IntelliJ**: `File` → `Project Structure` → `Libraries` → `+` → select the JAR
 
-### 5. Run the project
+### 5. Compile and run from the command line
+
+Set your MySQL Connector/J jar path, then compile and run. Example for PowerShell:
+
+```powershell
+$env:MYSQL_JAR="lib\\mysql-connector-j-8.4.0.jar"
+javac -cp ".;$env:MYSQL_JAR" -d bin (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object FullName)
+java -cp "bin;$env:MYSQL_JAR" Main
+```
+
+Example for macOS/Linux:
+
+```bash
+MYSQL_JAR="lib/mysql-connector-j-8.4.0.jar"
+javac -cp ".:$MYSQL_JAR" -d bin $(find src -name "*.java")
+java -cp "bin:$MYSQL_JAR" Main
+```
+
+### 6. Run the project from an IDE
 
 - Open `Main.java`
 - Run it as a Java Application
@@ -198,7 +215,7 @@ ID: 1 | Name: Elango Kannan | Age: 21 | Email: elango@example.com | Course: B.E.
   ```
   src/db.properties
   ```
-- `DBConnect.java` uses `FileInputStream("src/db.properties")` — make sure you run the project **from the project root directory**, or update the path accordingly.
+- `DBConnect.java` uses `FileInputStream("src/db/db.properties")` — make sure you run the project **from the project root directory**, or update the path accordingly.
 - MySQL Connector/J JAR must be in the classpath for the JDBC driver to load successfully.
 
 

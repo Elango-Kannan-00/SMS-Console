@@ -7,7 +7,7 @@ public class Attendance {
     private int id;
     private int studentId;
     private Date date;
-    private String status; // Present, Absent, Late, Leave
+    private String status; 
 
     // Constructors
     public Attendance() {}
