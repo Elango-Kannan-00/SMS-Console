@@ -1,113 +1,113 @@
-# Student Management System - Java Console App
+# Student Management System (Console, Java + JDBC)
 
-A **Java console-based CRUD application** to manage student records using **JDBC + MySQL**. Built with a clean **3-layer architecture** (Model → DAO → Main), this project demonstrates core Java database connectivity without any web framework.
-
-
-# About the Project
-
-**SMS-Console** is a terminal-driven Student Management System that lets you perform all CRUD operations — Add, View, Update, and Delete — directly from the console. It uses **JDBC** to connect to a **MySQL** database, reads credentials from an external `db.properties` file to keep sensitive data out of code, and follows a clean package-based project structure.
-
-This is a great beginner-to-intermediate Java project that shows how real-world applications separate concerns across layers.
-
+A console-based Student Management System built with Java, JDBC, and MySQL. The project follows a clean layered structure (models -> dao -> services -> Main) and demonstrates CRUD operations with a simple CLI.
 
 # Features
 
-- **Add Student** — Enter name, age, email, and course to register a student
-- **View All Students** — List all student records from the database
-- **Update Student** — Modify a student's details using their ID
-- **Delete Student** — Remove a student record by ID
-- **Externalized DB Config** — Credentials stored in `db.properties`, not hardcoded
-- **DAO Pattern** — Clean separation between database logic and business logic
-- **Looping Menu** — Interactive CLI menu runs continuously until user exits
-
+- Manage students, departments, subjects, marks, and attendance
+- Add records from the console menu
+- View a student by ID
+- Attendance percentage calculation
+- JDBC-based persistence with a MySQL database
+- Externalized database configuration in `src/db/db.properties`
 
 # Tech Stack
 
-| Component     | Technology                        |
-|---------------|-----------------------------------|
-| Language      | Java (JDK 8+)                     |
-| Database      | MySQL                             |
-| DB Connector  | JDBC (MySQL Connector/J)          |
-| Config        | `db.properties` (FileInputStream) |
-| Architecture  | DAO + Model + Main (3-layer)      |
-| Interface     | Console / Terminal (CLI)          |
-
+- Java (JDK 8+)
+- MySQL
+- JDBC (MySQL Connector/J)
 
 # Project Structure
 
 ```
 SMS-Console/
-│
-├── src/
-│   ├── Main.java                  # Entry point — CLI menu loop
-│   │
-│   ├── models/
-│   │   └── Student.java           # Student POJO (id, name, age, email, course)
-│   │
-│   ├── dao/
-│   │   └── StudentDAO.java        # All CRUD operations via JDBC
-│   │
-│   ├── db/
-│   │   ├── DBConnect.java         # Reads db.properties and returns Connection
-│   │   └── db.properties          # DB URL, username, password (not committed)
+|
+|-- src/
+|   |-- Main.java
+|   |-- models/
+|   |   |-- Student.java
+|   |   |-- Department.java
+|   |   |-- Subject.java
+|   |   |-- Marks.java
+|   |   |-- Attendance.java
+|   |
+|   |-- dao/
+|   |   |-- StudentDAO.java
+|   |   |-- DepartmentDAO.java
+|   |   |-- SubjectDAO.java
+|   |   |-- MarksDAO.java
+|   |   |-- AttendanceDAO.java
+|   |
+|   |-- services/
+|   |   |-- StudentService.java
+|   |   |-- DepartmentService.java
+|   |   |-- SubjectService.java
+|   |   |-- MarksService.java
+|   |   |-- AttendanceService.java
+|   |
+|   |-- db/
+|   |   |-- DBConnect.java
+|   |   |-- db.properties
+|
+|-- lib/
+|-- bin/
 ```
-
 
 # Database Setup
 
-### Step 1 — Create the database
+Create a database and tables that match the DAO layer.
 
 ```sql
 CREATE DATABASE sms;
-```
-
-### Step 2 — Select the database
-
-```sql
 USE sms;
-```
 
-### Step 3 — Create the students table
+CREATE TABLE departments (
+    id   INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL
+);
 
-```sql
 CREATE TABLE students (
+    id             INT PRIMARY KEY AUTO_INCREMENT,
+    name           VARCHAR(100) NOT NULL,
+    age            INT,
+    email          VARCHAR(100),
+    gender         VARCHAR(20),
+    phone          VARCHAR(30),
+    year           INT,
+    status         VARCHAR(20) DEFAULT 'Active',
+    department_id  INT,
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+);
+
+CREATE TABLE subjects (
+    id             INT PRIMARY KEY AUTO_INCREMENT,
+    name           VARCHAR(100) NOT NULL,
+    department_id  INT NOT NULL,
+    FOREIGN KEY (department_id) REFERENCES departments(id)
+);
+
+CREATE TABLE marks (
     id         INT PRIMARY KEY AUTO_INCREMENT,
-    name       VARCHAR(100),
-    age        INT,
-    email      VARCHAR(100),
-    course     VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status     VARCHAR(20) DEFAULT 'Active'
+    student_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    exam_type  VARCHAR(50),
+    marks      INT,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+CREATE TABLE attendance (
+    id         INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    date       DATE,
+    status     VARCHAR(20),
+    FOREIGN KEY (student_id) REFERENCES students(id)
 );
 ```
 
+# Configuration
 
-# Prerequisites
-
-Make sure the following are set up on your machine:
-
-- [Java JDK 8+](https://www.oracle.com/java/technologies/javase-downloads.html)
-- [MySQL Server](https://dev.mysql.com/downloads/mysql/)
-- [MySQL Connector/J JAR](https://dev.mysql.com/downloads/connector/j/)
-- Any IDE — IntelliJ IDEA, Eclipse, VS Code
-
-
-# How to Set Up & Run
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Elango-Kannan-00/SMS-Console.git
-cd SMS-Console
-```
-
-### 2. Set up the database
-
-Run the SQL commands from the [Database Setup](#️-database-setup) section in your MySQL Workbench or terminal.
-
-### 3. Configure your DB credentials
-
-Open `src/db.properties` and fill in your MySQL username and password:
+Edit `src/db/db.properties`:
 
 ```properties
 db.url=jdbc:mysql://localhost:3306/sms
@@ -115,23 +115,19 @@ db.user=your_mysql_username
 db.password=your_mysql_password
 ```
 
-### 4. Add MySQL Connector/J to your project
+# Build and Run
 
-- Download the [MySQL Connector/J JAR](https://dev.mysql.com/downloads/connector/j/)
-- In **Eclipse**: Right-click project → `Build Path` → `Add External JARs` → select the JAR
-- In **IntelliJ**: `File` → `Project Structure` → `Libraries` → `+` → select the JAR
+Place the MySQL Connector/J jar in `lib/` or use any path you prefer.
 
-### 5. Compile and run from the command line
-
-Set your MySQL Connector/J jar path, then compile and run. Example for PowerShell:
+PowerShell:
 
 ```powershell
-$env:MYSQL_JAR="lib\\mysql-connector-j-8.4.0.jar"
+$env:MYSQL_JAR="lib\mysql-connector-j-8.4.0.jar"
 javac -cp ".;$env:MYSQL_JAR" -d bin (Get-ChildItem -Recurse -Filter *.java src | ForEach-Object FullName)
 java -cp "bin;$env:MYSQL_JAR" Main
 ```
 
-Example for macOS/Linux:
+macOS/Linux:
 
 ```bash
 MYSQL_JAR="lib/mysql-connector-j-8.4.0.jar"
@@ -139,93 +135,23 @@ javac -cp ".:$MYSQL_JAR" -d bin $(find src -name "*.java")
 java -cp "bin:$MYSQL_JAR" Main
 ```
 
-### 6. Run the project from an IDE
+# Notes
 
-- Open `Main.java`
-- Run it as a Java Application
-- The console menu will appear:
+- Run the app from the project root so `DBConnect.java` can read `src/db/db.properties`.
+- Ensure the MySQL Connector/J jar is on the classpath.
+- Keep real credentials out of version control.
+
+# Sample Output
 
 ```
-=== Student Management System ===
+===== STUDENT MANAGEMENT SYSTEM =====
 1. Add Student
-2. View All Students
-3. Update Student
-4. Delete Student
-5. Exit
-Choose an option:
+2. View Student
+3. Add Department
+4. Add Subject
+5. Add Marks
+6. Mark Attendance
+7. View Attendance %
+8. Exit
+Enter choice:
 ```
-
-
-# How It Works
-
-```
-User Input (Console)
-        │
-        ▼
-    Main.java  ──── reads input via Scanner
-        │
-        ▼
-  StudentDAO.java  ──── CRUD methods (add / getAll / update / delete)
-        │
-        ▼
-  DBConnect.java  ──── loads db.properties → DriverManager.getConnection()
-        │
-        ▼
-  MySQL Database (sms.students table)
-        │
-        ▼
-  Result printed back to Console
-```
-
-### Layer Breakdown
-
-| Layer          | File               | Responsibility                                                   |
-|----------------|--------------------|------------------------------------------------------------------|
-| **Model**      | `Student.java`     | POJO with fields, constructors, getters/setters, `toString()`   |
-| **DAO**        | `StudentDAO.java`  | SQL queries using `PreparedStatement` & `ResultSet`             |
-| **DB Utility** | `DBConnect.java`   | Reads `db.properties`, loads JDBC driver, returns `Connection`  |
-| **Entry Point**| `Main.java`        | Scanner-based menu loop, ties all layers together                |
-
-
-# Sample Console Output
-
-```
-=== Student Management System ===
-1. Add Student
-2. View All Students
-3. Update Student
-4. Delete Student
-5. Exit
-Choose an option: 1
-
-Name: Elango Kannan
-Age: 21
-Email: elango@example.com
-Course: B.E. Computer Science
-Student added successfully!
-
-Choose an option: 2
-ID: 1 | Name: Elango Kannan | Age: 21 | Email: elango@example.com | Course: B.E. Computer Science
-```
-
-
-# Important Notes
-
-- **Never commit** `db.properties` with real credentials. Add it to `.gitignore`:
-  ```
-  src/db.properties
-  ```
-- `DBConnect.java` uses `FileInputStream("src/db/db.properties")` — make sure you run the project **from the project root directory**, or update the path accordingly.
-- MySQL Connector/J JAR must be in the classpath for the JDBC driver to load successfully.
-
-
-# Contributing
-
-Pull requests are welcome! For major changes, open an issue first to discuss what you'd like to change.
-
-
-# Author
-
-**Elango Kannan**  
-B.E. Computer Science & Engineering  
-[GitHub](https://github.com/Elango-Kannan-00)
