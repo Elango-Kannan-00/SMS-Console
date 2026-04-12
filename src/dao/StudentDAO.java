@@ -1,98 +1,138 @@
 package dao;
+
+import models.Student;
+import db.DBConnect;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import db.DBConnect;
-import models.Student;
-
 public class StudentDAO {
 
-    // Add Student
-    public void addStudent(Student student) {
-    String sql = "INSERT INTO students(name, age, email, course) VALUES (?, ?, ?, ?)";
+    // ADD STUDENT
+    public void addStudent(Student s) throws Exception {
 
-    try (Connection conn = DBConnect.getConnection()) {
+        String sql = "INSERT INTO students(name, age, email, gender, phone, year, status, department_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        if (conn == null) {
-            System.out.println("Database connection failed!");
-            return;
-        }
+        try (Connection con = DBConnect.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, s.getName());
+            ps.setInt(2, s.getAge());
+            ps.setString(3, s.getEmail());
+            ps.setString(4, s.getGender());
+            ps.setString(5, s.getPhone());
+            ps.setInt(6, s.getYear());
+            ps.setString(7, s.getStatus());
 
-        ps.setString(1, student.getName());
-        ps.setInt(2, student.getAge());
-        ps.setString(3, student.getEmail());
-        ps.setString(4, student.getCourse());
-
-        ps.executeUpdate();
-        System.out.println("Student added successfully!");
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-}
-
-    // View All Students
-    public List<Student> getAllStudents() {
-        List<Student> list = new ArrayList<>();
-        String sql = "SELECT * FROM students";
-        try (Connection conn = DBConnect.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                Student s = new Student(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getInt("age"),
-                        rs.getString("email"),
-                        rs.getString("course")
-                );
-                list.add(s);
+            if (s.getDepartmentId() != null) {
+                ps.setInt(8, s.getDepartmentId());
+            } else {
+                ps.setNull(8, Types.INTEGER);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+            ps.executeUpdate();
+        }
+    }
+
+    // GET STUDENT BY ID
+    public Student getStudentById(int id) throws Exception {
+
+        String sql = "SELECT * FROM students WHERE id = ?";
+
+        try (Connection con = DBConnect.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return extractStudent(rs);
+            }
+        }
+        return null;
+    }
+
+    // GET ALL STUDENTS
+    public List<Student> getAllStudents() throws Exception {
+
+        List<Student> list = new ArrayList<>();
+        String sql = "SELECT * FROM students";
+
+        try (Connection con = DBConnect.getConnection();
+             Statement st = con.createStatement()) {
+
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                list.add(extractStudent(rs));
+            }
         }
         return list;
     }
 
-    // Update Student
-    public void updateStudent(Student student) {
-        String sql = "UPDATE students SET name=?, age=?, email=?, course=? WHERE id=?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    // UPDATE STUDENT
+    public void updateStudent(Student s) throws Exception {
 
-            ps.setString(1, student.getName());
-            ps.setInt(2, student.getAge());
-            ps.setString(3, student.getEmail());
-            ps.setString(4, student.getCourse());
-            ps.setInt(5, student.getId());
+        String sql = "UPDATE students SET name=?, age=?, email=?, gender=?, phone=?, year=?, status=?, department_id=? WHERE id=?";
 
-            int rows = ps.executeUpdate();
-            if (rows > 0) System.out.println("Student updated successfully!");
-            else System.out.println("Student ID not found.");
+        try (Connection con = DBConnect.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+            ps.setString(1, s.getName());
+            ps.setInt(2, s.getAge());
+            ps.setString(3, s.getEmail());
+            ps.setString(4, s.getGender());
+            ps.setString(5, s.getPhone());
+            ps.setInt(6, s.getYear());
+            ps.setString(7, s.getStatus());
+
+            if (s.getDepartmentId() != null) {
+                ps.setInt(8, s.getDepartmentId());
+            } else {
+                ps.setNull(8, Types.INTEGER);
+            }
+
+            ps.setInt(9, s.getId());
+
+            ps.executeUpdate();
         }
     }
 
-    // Delete Student
-    public void deleteStudent(int id) {
+    // DELETE STUDENT
+    public void deleteStudent(int id) throws Exception {
+
         String sql = "DELETE FROM students WHERE id=?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        try (Connection con = DBConnect.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            int rows = ps.executeUpdate();
-            if (rows > 0) System.out.println("Student deleted successfully!");
-            else System.out.println("Student ID not found.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            ps.executeUpdate();
         }
+    }
+
+    // HELPER METHOD
+    private Student extractStudent(ResultSet rs) throws Exception {
+
+        Student s = new Student();
+
+        s.setId(rs.getInt("id"));
+        s.setName(rs.getString("name"));
+        s.setAge(rs.getInt("age"));
+        s.setEmail(rs.getString("email"));
+        s.setGender(rs.getString("gender"));
+        s.setPhone(rs.getString("phone"));
+        s.setYear(rs.getInt("year"));
+        s.setStatus(rs.getString("status"));
+
+        int deptId = rs.getInt("department_id");
+        if (rs.wasNull()) {
+            s.setDepartmentId(null);
+        } else {
+            s.setDepartmentId(deptId);
+        }
+
+        return s;
     }
 }
