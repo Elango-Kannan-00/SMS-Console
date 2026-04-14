@@ -1,6 +1,6 @@
 # Student Management System (Console, Java + JDBC)
 
-A console-based Student Management System built with Java, JDBC, and MySQL. The project follows a clean layered structure (models -> dao -> services -> Main) and demonstrates CRUD operations with a simple CLI.
+A console-based Student Management System (SMS) built with Java, JDBC, and MySQL. The project follows a clean layered structure (models -> dao -> services -> Main) and demonstrates CRUD operations with a simple CLI.
 
 # Features
 
