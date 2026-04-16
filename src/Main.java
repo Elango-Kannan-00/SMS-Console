@@ -54,7 +54,7 @@ public class Main {
                         viewAttendancePercentage();
                         break;
                     case 8:
-                        System.out.println("Exiting...");
+                        System.out.println("Exiting...Thank You!");
                         return;
                     default:
                         System.out.println("Invalid choice!");
